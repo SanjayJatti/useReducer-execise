@@ -41,44 +41,96 @@ const reducerFnc = (state, action) => {
   switch (action.type) {
     case "SORT-BY":
       return { ...state, sortBy: action.payload };
+    case "FILTER-BY-STOCK":
+      return { ...state, inStockOnly: !state.inStockOnly };
+    case "FILTER-BY-DELIVERY":
+      return { ...state, fastDeliveryOnly: !state.fastDeliveryOnly };
     default:
       return state;
   }
 };
 
 export default function App() {
-  const [state, dispatch] = useReducer(reducerFnc(), {
-    sortBy: null,
+  const [
+    { products, sortBy, inStockOnly, fastDeliveryOnly },
+    dispatch
+  ] = useReducer(reducerFnc, {
+    products: data,
+    sortBy: false,
     inStockOnly: false,
     fastDeliveryOnly: false
   });
 
+  const filteredProducts = () => {
+    let transformedProducts = products;
+
+    if (sortBy) {
+      transformedProducts = transformedProducts.sort((a, b) =>
+        sortBy === "PRICE-LOW-TO-HIGH" ? a.price - b.price : b.price - a.price
+      );
+    }
+
+    if (inStockOnly) {
+      transformedProducts = transformedProducts.filter((item) => item.inStock);
+    }
+
+    if (fastDeliveryOnly) {
+      transformedProducts = transformedProducts.filter(
+        (item) => item.fastDelivery
+      );
+    }
+
+    return transformedProducts;
+  };
+
   return (
     <>
       <div>
-        <label>
-          <input
-            type="radio"
-            checked={state.sortBy && state.sortBy === "PRICE-LOW-TO-HIGH"}
-            onChange={() =>
-              dispatch({ type: "SORT-BY", payload: "PRICE-LOW-TO-HIGH" })
-            }
-          />
-          Price : Low to High
-        </label>
-        <label>
-          <input
-            type="radio"
-            checked={state.sortBy && state.sortBy === "PRICE-HIGH-TO-LOW"}
-            onChange={() =>
-              dispatch({ type: "SORT-BY", payload: "PRICE-HIGH-TO-LOW" })
-            }
-          />
-          Price : Low to High
-        </label>
+        <div>
+          <label>
+            <input
+              type="radio"
+              checked={sortBy === "PRICE-LOW-TO-HIGH" ? true : false}
+              onChange={() =>
+                dispatch({ type: "SORT-BY", payload: "PRICE-LOW-TO-HIGH" })
+              }
+            />
+            Price : Low to High
+          </label>
+          <label>
+            <input
+              type="radio"
+              checked={sortBy === "PRICE-HIGH-TO-LOW" ? true : false}
+              onChange={() =>
+                dispatch({ type: "SORT-BY", payload: "PRICE-HIGH-TO-LOW" })
+              }
+            />
+            Price : High to Low
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              checked={inStockOnly}
+              onChange={() => dispatch({ type: "FILTER-BY-STOCK" })}
+            />
+            In Stock Only
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="checkbox"
+              checked={fastDeliveryOnly}
+              onChange={() => dispatch({ type: "FILTER-BY-DELIVERY" })}
+            />
+            Fast Delivery Only
+          </label>
+        </div>
       </div>
       <div className="App" style={{ display: "flex", flexWrap: "wrap" }}>
-        {data.map(
+        {filteredProducts().map(
           ({
             id,
             name,
