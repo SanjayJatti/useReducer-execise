@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useReducer } from "react";
 import "./styles.css";
 
 import faker from "faker";
@@ -37,9 +37,46 @@ const data = [...Array(50)].map((item) => ({
   color: faker.commerce.color()
 }));
 
+const reducerFnc = (state, action) => {
+  switch (action.type) {
+    case "SORT-BY":
+      return { ...state, sortBy: action.payload };
+    default:
+      return state;
+  }
+};
+
 export default function App() {
+  const [state, dispatch] = useReducer(reducerFnc(), {
+    sortBy: null,
+    inStockOnly: false,
+    fastDeliveryOnly: false
+  });
+
   return (
     <>
+      <div>
+        <label>
+          <input
+            type="radio"
+            checked={state.sortBy && state.sortBy === "PRICE-LOW-TO-HIGH"}
+            onChange={() =>
+              dispatch({ type: "SORT-BY", payload: "PRICE-LOW-TO-HIGH" })
+            }
+          />
+          Price : Low to High
+        </label>
+        <label>
+          <input
+            type="radio"
+            checked={state.sortBy && state.sortBy === "PRICE-HIGH-TO-LOW"}
+            onChange={() =>
+              dispatch({ type: "SORT-BY", payload: "PRICE-HIGH-TO-LOW" })
+            }
+          />
+          Price : Low to High
+        </label>
+      </div>
       <div className="App" style={{ display: "flex", flexWrap: "wrap" }}>
         {data.map(
           ({
