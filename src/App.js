@@ -45,6 +45,14 @@ const reducerFnc = (state, action) => {
       return { ...state, inStockOnly: !state.inStockOnly };
     case "FILTER-BY-DELIVERY":
       return { ...state, fastDeliveryOnly: !state.fastDeliveryOnly };
+    case "SEARCH":
+      return { ...state, search: action.payload };
+    case "CLEAR-ALL":
+      return {
+        sortBy: false,
+        inStockOnly: false,
+        fastDeliveryOnly: false
+      };
     default:
       return state;
   }
@@ -52,17 +60,17 @@ const reducerFnc = (state, action) => {
 
 export default function App() {
   const [
-    { products, sortBy, inStockOnly, fastDeliveryOnly },
+    { sortBy, inStockOnly, fastDeliveryOnly, search },
     dispatch
   ] = useReducer(reducerFnc, {
-    products: data,
     sortBy: false,
     inStockOnly: false,
-    fastDeliveryOnly: false
+    fastDeliveryOnly: false,
+    search: ""
   });
 
   const filteredProducts = () => {
-    let transformedProducts = products;
+    let transformedProducts = data;
 
     if (sortBy) {
       transformedProducts = transformedProducts.sort((a, b) =>
@@ -77,6 +85,12 @@ export default function App() {
     if (fastDeliveryOnly) {
       transformedProducts = transformedProducts.filter(
         (item) => item.fastDelivery
+      );
+    }
+
+    if (search) {
+      transformedProducts = transformedProducts.filter((item) =>
+        item.name.toLowerCase().includes(search)
       );
     }
 
@@ -127,6 +141,18 @@ export default function App() {
             />
             Fast Delivery Only
           </label>
+        </div>
+        <div>
+          <button onClick={() => dispatch({ type: "CLEAR-ALL" })}>Clear</button>
+        </div>
+        <div>
+          <input
+            type="text"
+            placeholder="Search Here"
+            onChange={(e) =>
+              dispatch({ type: "SEARCH", payload: e.target.value })
+            }
+          />
         </div>
       </div>
       <div className="App" style={{ display: "flex", flexWrap: "wrap" }}>
